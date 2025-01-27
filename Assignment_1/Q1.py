@@ -8,6 +8,7 @@ phantom = loadmat('data/assignmentImageDenoising_phantom.mat')
 
 imageNoiseless = phantom['imageNoiseless']
 imageNoisy = phantom['imageNoisy']
+print(imageNoisy.shape)
 
 
 def display_image(image):
