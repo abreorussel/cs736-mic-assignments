@@ -2,35 +2,20 @@ import numpy as np
 from config import *
 
 
-def gaussian_likelihood_gradient(x, y):
-    return 2*(x - y)/np.square(sigma_likelihood)
+################
+# Likelihoods
+################
 
-# def get_4_neighbor_values(image, i, j):
-#     height, width = image.shape
-#     neighbor_values = []
 
-#     left_value = image[i, (j - 1) % width]
-#     neighbor_values.append(left_value)
+def gaussian_likelihood(x, y):
+    likelihood =  - np.abs((x - y)**2) / np.square(sigma_likelihood)
+    likelihood_gradient = - 2*(x - y) / np.square(sigma_likelihood)
+    return likelihood, likelihood_gradient
 
-#     right_value = image[i, (j + 1) % width]
-#     neighbor_values.append(right_value)
 
-#     up_value = image[(i - 1) % height, j]
-#     neighbor_values.append(up_value)
-
-#     down_value = image[(i + 1) % height, j]
-#     neighbor_values.append(down_value)
-    
-#     return neighbor_values
-
-# def quadratic_prior_gradient(image, x, y):
-#     current_pixel = image[x][y]
-#     neighbors = get_4_neighbor_values(image, x, y)
-#     return 2*np.sum(neighbors - current_pixel)
-
-def rrmse(A,B):
-	rrmse = np.sqrt(np.sum(np.square(A-B))/np.sum(A*2))
-	return rrmse
+##########
+# Priors
+##########
 
 def calc_quadratic_prior(x):
     up = np.roll(x, 1, axis=0)
@@ -48,10 +33,30 @@ def calc_quadratic_prior(x):
     up_prior_grad = 2 * (up - x)
     down_prior_grad = 2 * (down - x)
 
-    prior = np.sum(left_prior, right_prior, up_prior, down_prior)
-    prior_grad = np.sum(left_prior_grad, right_prior_grad ,up_prior_grad ,down_prior_grad)
+ 
+
+    prior = - (left_prior + right_prior + up_prior + down_prior)
+    prior_grad =  (left_prior_grad + right_prior_grad + up_prior_grad + down_prior_grad)
 
     return prior, prior_grad
+    
+
+
+def calculate_posterior(x, y, alpha=alpha):
+    prior, prior_grad = calc_quadratic_prior(x)
+    likelihood, likelihood_grad = gaussian_likelihood(x, y)
+
+    log_posterior = alpha*(prior) + (1 - alpha)*likelihood
+    log_posterior_grad = alpha*(prior_grad) + (1 - alpha)*likelihood_grad
+
+    return log_posterior, log_posterior_grad
+
+
+
+
+def rrmse(A,B):
+	rrmse = np.sqrt(np.sum(np.square(np.abs(A)-np.abs(B)))/np.sum(A**2))
+	return rrmse
 
     
 
