@@ -74,6 +74,31 @@ def calc_huber_prior(x):
 
 	return prior, prior_grad
 
+def calc_adaptive_prior(x):
+	up, down, right, left = get_clique_differences(x)
+
+	def adaptive(diff, gamma):
+		abs_diff = np.abs(diff)
+		return (gamma * abs_diff) - (gamma**2) * np.log(1 + (abs_diff / gamma))
+	
+	def adaptive_grad(diff, gamma):
+		abs_diff = np.abs(diff)
+		return  (gamma * np.sign(diff)) - (gamma / (1 + (abs_diff / gamma))) * np.sign(diff) 
+
+	left_prior = adaptive(left - x, gamma)
+	right_prior = adaptive(right - x, gamma)
+	up_prior = adaptive(up - x, gamma)
+	down_prior = adaptive(down - x, gamma)
+
+	left_prior_grad = adaptive_grad(left - x, gamma)
+	right_prior_grad = adaptive_grad(right - x, gamma)
+	up_prior_grad = adaptive_grad(up - x, gamma)
+	down_prior_grad = adaptive_grad(down - x, gamma)
+
+	prior = - (left_prior + right_prior + up_prior + down_prior)
+	prior_grad =  (left_prior_grad + right_prior_grad + up_prior_grad + down_prior_grad)
+	return prior, prior_grad
+
 
 
 		
@@ -85,7 +110,8 @@ def calc_huber_prior(x):
 
 def calculate_posterior(x, y, alpha=alpha):
 	# prior, prior_grad = calc_quadratic_prior(x)
-	prior, prior_grad = calc_huber_prior(x)
+	# prior, prior_grad = calc_huber_prior(x)
+	prior, prior_grad = calc_adaptive_prior(x)
 	likelihood, likelihood_grad = gaussian_likelihood(x, y)
 
 	log_posterior = alpha*(prior) + (1 - alpha)*likelihood
