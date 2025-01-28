@@ -36,7 +36,7 @@ def calc_quadratic_prior(x):
 	up_prior = np.square(np.abs(up - x))
 	down_prior = np.square(np.abs(down - x))
 
-	left_prior_grad = 2 * (left - x)
+	left_prior_grad = 2 * (left - x) 
 	right_prior_grad = 2 * (right - x)
 	up_prior_grad = 2 * (up - x)
 	down_prior_grad = 2 * (down - x)
@@ -109,9 +109,9 @@ def calc_adaptive_prior(x):
 
 
 def calculate_posterior(x, y, alpha=alpha):
-	# prior, prior_grad = calc_quadratic_prior(x)
+	prior, prior_grad = calc_quadratic_prior(x)
 	# prior, prior_grad = calc_huber_prior(x)
-	prior, prior_grad = calc_adaptive_prior(x)
+	# prior, prior_grad = calc_adaptive_prior(x)
 	likelihood, likelihood_grad = gaussian_likelihood(x, y)
 
 	log_posterior = alpha*(prior) + (1 - alpha)*likelihood
