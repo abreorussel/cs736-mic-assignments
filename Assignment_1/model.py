@@ -8,7 +8,7 @@ from config import *
 
 
 def gaussian_likelihood(x, y):
-	likelihood =  - np.abs((x - y)**2) / np.square(sigma_likelihood)
+	likelihood =  - np.sum(np.abs((x - y)**2) / np.square(sigma_likelihood))
 	likelihood_gradient = - 2*(x - y) / np.square(sigma_likelihood)
 	return likelihood, likelihood_gradient
 
@@ -28,13 +28,13 @@ def get_clique_differences(x):
 
 
 
-def calc_quadratic_prior(x):
+def calc_quadratic_prior(x, gamma=None):
 	up, down, right, left = get_clique_differences(x)
 
-	left_prior = np.square(np.abs(left - x))
-	right_prior = np.square(np.abs(right - x))
-	up_prior = np.square(np.abs(up - x))
-	down_prior = np.square(np.abs(down - x))
+	left_prior = np.sum(np.square(np.abs(left - x)))
+	right_prior = np.sum(np.square(np.abs(right - x)))
+	up_prior = np.sum(np.square(np.abs(up - x)))
+	down_prior = np.sum(np.square(np.abs(down - x)))
 
 	left_prior_grad = 2 * np.abs(left - x) * np.sign(left - x) 
 	right_prior_grad = 2 * np.abs(right - x) * np.sign(right - x)
@@ -48,7 +48,7 @@ def calc_quadratic_prior(x):
 
 
 
-def calc_huber_prior(x):
+def calc_huber_prior(x, gamma=0):
 	up, down, right, left = get_clique_differences(x)
 
 	def huber(diff, gamma):
@@ -59,10 +59,10 @@ def calc_huber_prior(x):
 		abs_diff = np.abs(diff) 
 		return np.where(abs_diff <= gamma, diff, gamma * np.sign(diff))
 	
-	left_prior = huber(left - x, gamma)
-	right_prior = huber(right - x, gamma)
-	up_prior = huber(up - x, gamma)
-	down_prior = huber(down - x, gamma)
+	left_prior = np.sum(huber(left - x, gamma))
+	right_prior = np.sum(huber(right - x, gamma))
+	up_prior = np.sum(huber(up - x, gamma))
+	down_prior = np.sum(huber(down - x, gamma))
 
 	left_prior_grad = huber_grad(left - x, gamma)
 	right_prior_grad = huber_grad(right - x, gamma)
@@ -74,7 +74,7 @@ def calc_huber_prior(x):
 
 	return prior, prior_grad
 
-def calc_adaptive_prior(x):
+def calc_adaptive_prior(x, gamma=0):
 	up, down, right, left = get_clique_differences(x)
 
 	def adaptive(diff, gamma):
@@ -85,10 +85,10 @@ def calc_adaptive_prior(x):
 		abs_diff = np.abs(diff)
 		return  (gamma * np.sign(diff)) - (gamma / (1 + (abs_diff / gamma))) * np.sign(diff) 
 
-	left_prior = adaptive(left - x, gamma)
-	right_prior = adaptive(right - x, gamma)
-	up_prior = adaptive(up - x, gamma)
-	down_prior = adaptive(down - x, gamma)
+	left_prior = np.sum(adaptive(left - x, gamma))
+	right_prior = np.sum(adaptive(right - x, gamma))
+	up_prior = np.sum(adaptive(up - x, gamma))
+	down_prior = np.sum(adaptive(down - x, gamma))
 
 	left_prior_grad = adaptive_grad(left - x, gamma)
 	right_prior_grad = adaptive_grad(right - x, gamma)
@@ -101,25 +101,32 @@ def calc_adaptive_prior(x):
 
 
 
-		
-		 
-
-	 
+def calculate_posterior(x, y, alpha=0.5, gamma = 0, likelihood="gaussian", prior="quadratic"):
+	# prior, prior_grad = calc_quadratic_prior(x)
+	# prior, prior_grad = calc_huber_prior(x, gamma)
 	
+    likelihood_mapping = {
+		"gaussian": gaussian_likelihood,
+    }
 
+    prior_mapping = {
+		"quadratic":calc_quadratic_prior,
+		"huber": calc_huber_prior,
+		"adaptive":calc_adaptive_prior
+    }
+	
+    likelihood_fn = likelihood_mapping[likelihood]
+    prior_fn = prior_mapping[prior]
+	
+    prior, prior_grad = prior_fn(x, gamma)
+    likelihood, likelihood_grad = likelihood_fn(x, y)
 
-def calculate_posterior(x, y, alpha=alpha):
-	prior, prior_grad = calc_quadratic_prior(x)
-	# prior, prior_grad = calc_huber_prior(x)
-	# prior, prior_grad = calc_adaptive_prior(x)
-	likelihood, likelihood_grad = gaussian_likelihood(x, y)
+    log_posterior = alpha*(prior) + (1 - alpha)*likelihood
+    log_posterior_grad = alpha*(prior_grad) + (1 - alpha)*likelihood_grad
+	
+    print(log_posterior)
 
-	log_posterior = alpha*(prior) + (1 - alpha)*likelihood
-	log_posterior_grad = alpha*(prior_grad) + (1 - alpha)*likelihood_grad
-
-	return log_posterior, log_posterior_grad
-
-
+    return log_posterior, log_posterior_grad
 
 
 def rrmse(A,B):
@@ -127,7 +134,6 @@ def rrmse(A,B):
 	return rrmse
 
 	
-
-
-
+def grid_search(gamma_end, prior="quadratic" ,alpha_start=0, alpha_end=1, alpha_increment=0.1, gamma_start=0):
+    pass
 
