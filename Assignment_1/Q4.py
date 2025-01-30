@@ -22,9 +22,27 @@ def normalize_image(image):
 	image = np.array(image)
 	return ( image - np.min(image) ) / ( np.max(image) - np.min(image) )
 
-def extract_patches(image, patch_size=0):
-	num_of_patches = image.size[0] / patch_size
-	h , w = image.size[0] , image.size[1]
+import numpy as np
+
+def extract_non_overlapping_patches(image, patch_size=(8, 8)):
+    image_height, image_width = image.shape
+    patch_height, patch_width = patch_size
+
+    num_patches_height = image_height // patch_height
+    num_patches_width = image_width // patch_width
+
+    patches = np.zeros((num_patches_height * num_patches_width, patch_height, patch_width))
+
+    patch_index = 0
+    for i in range(0, image_height, patch_height):
+        for j in range(0, image_width, patch_width):
+    
+            if i + patch_height <= image_height and j + patch_width <= image_width:
+                patches[patch_index] = image[i:i+patch_height, j:j+patch_width]
+                patch_index += 1
+
+    patches = patches[:patch_index]
+    return patches
 
 	
 
@@ -91,6 +109,7 @@ def optimize(x_true ,y_observed, step_size=1e-2, iterations=100, alpha=0.5, gamm
 
 if __name__ == "__main__":
 	
+	K = 64
 	chestCT = mat73.loadmat('data/assignmentImageDenoising_chestCT.mat')
 
 	image = chestCT['imageChestCT']
@@ -98,6 +117,22 @@ if __name__ == "__main__":
 	print(f'Image Size : {image.shape}')
 
 	image =  normalize_image(image)
+
+	patches = extract_non_overlapping_patches(image)
+	var_patches = list()
+	for patch in patches:
+		var_patches.append((np.var(patch), patch))
+
+	var_patches = sorted(var_patches, key=lambda x: x[0], reverse=True)
+
+	columns = []
+	for i in range(K):
+		columns.append(var_patches[i][1].flatten())
+
+	D =	np.column_stack(columns)
+
+	print(D.shape)
+	print(D)
 
 	# optimize(imageNoiseless, imageNoisy, alpha=0.08, gamma=0.5, likelihood="gaussian", prior="huber-l1")
 
