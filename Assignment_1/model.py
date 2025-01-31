@@ -36,10 +36,10 @@ def calc_quadratic_prior(x, gamma=None):
 	up_prior = np.sum(np.square(np.abs(up - x)))
 	down_prior = np.sum(np.square(np.abs(down - x)))
 
-	left_prior_grad = 2 * np.abs(left - x) * np.sign(left - x) 
-	right_prior_grad = 2 * np.abs(right - x) * np.sign(right - x)
-	up_prior_grad = 2 * np.abs(up - x) * np.sign(up - x)
-	down_prior_grad = 2 * np.abs(down - x) * np.sign(down - x)
+	left_prior_grad = 2 * (left - x)  
+	right_prior_grad = 2 * (right - x) 
+	up_prior_grad = 2 * (up - x) 
+	down_prior_grad = 2 * (down - x) 
 
 	prior = - (left_prior + right_prior + up_prior + down_prior)
 	prior_grad =  (left_prior_grad + right_prior_grad + up_prior_grad + down_prior_grad)
