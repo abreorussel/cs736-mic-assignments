@@ -16,8 +16,8 @@ def normalize_image(image):
 	return ( image - np.min(image) ) / ( np.max(image) - np.min(image) )
 
 
-def optimize(x_true ,y_observed, step_size=1e-2, iterations=150, alpha=0.5, gamma=0, likelihood="gaussian", prior="huber"):
-
+def optimize(x_true ,y_observed, step_size=1e-2, iterations=150, alpha=0.5, gamma=0, likelihood="gaussian", prior="quadratic"):
+	print(prior)
 	max_threshold = 2.5
 	min_threshold = 0.001
 	max_step_size = 1e-1
@@ -68,28 +68,43 @@ def optimize(x_true ,y_observed, step_size=1e-2, iterations=150, alpha=0.5, gamm
 		if step_size <= 1e-8 : break
 
 
-	print(f"Log Posterior: {np.sum(new_log_posterior):.4f}, RRMSE: {current_rrmse:.4f} Alpha: {alpha} Gamma: {gamma} Prior: {prior}")
+	print(f"Log Posterior: {new_log_posterior:.4f}, RRMSE: {current_rrmse:.4f} Alpha: {alpha} Gamma: {gamma} Prior: {prior}")
 	
-	return x_estimate
+	return x_estimate, new_log_posterior, current_rrmse
 
-
-	
-def grid_search(gamma_start = 0, gamma_end=0, gamma_increment = 1, alpha_start=0, alpha_end=1, alpha_increment=0.1, prior="quadratic", likelihood="gaussian"):
-	if prior == "quadratic":
-		while(alpha_start < alpha_end):
-			optimize(imageNoiseless, imageNoisy, alpha=alpha_start, gamma=gamma_start, likelihood=likelihood, prior=prior)
-			alpha_start += alpha_increment
-
-
-	else: 
-		while(alpha_start < alpha_end):
-			while(gamma_start < gamma_end):
-				print(gamma_start, alpha_start)
-				# optimize(imageNoiseless, imageNoisy, alpha=alpha_start, gamma=gamma_start, likelihood=likelihood, prior=prior)
-				gamma_start += gamma_increment
-			alpha_start += alpha_increment
 
 	
+def grid_search(imageNoiseless, imageNoisy, gamma_start = 0, gamma_end=0, alpha_start=0, alpha_end=1, prior="quadratic", likelihood="gaussian"):
+	# stats = list()
+	rrmse = 100
+	alpha_optimal = 0
+	gamma_optimal = 0
+	gamma = 0
+	for alpha in np.linspace(alpha_start, alpha_end, 10):
+		if prior != "quadratic":
+			for gamma in np.linspace(gamma_start, gamma_end, 10):
+				x_estimate, new_log_posterior, current_rrmse = optimize(imageNoiseless, imageNoisy, alpha, gamma, likelihood, prior)
+				print(current_rrmse)
+				if current_rrmse < rrmse:
+					rrmse = current_rrmse
+					alpha_optimal = alpha
+					gamma_optimal = gamma
+		else:
+			print(f"ELse : {prior}")
+			x_estimate, new_log_posterior, current_rrmse = optimize(imageNoiseless, imageNoisy, alpha, gamma, likelihood, prior)
+			# print(current_rrmse)
+			if current_rrmse < rrmse:
+				rrmse = current_rrmse
+				alpha_optimal = alpha
+				gamma_optimal = gamma
+
+	print(f"############################# Optimal Values #################################")
+	print(f'prior : {prior} | alpha : {alpha_optimal} | gamma : {gamma_optimal} | log posterior : {new_log_posterior} | RRMSE : {rrmse}')
+
+
+				 
+
+				
 
 if __name__ == "__main__":
 	
@@ -100,8 +115,8 @@ if __name__ == "__main__":
 
 	imageNoiseless, imageNoisy = normalize_image(imageNoiseless), normalize_image(imageNoisy)
 
-	# optimize(imageNoiseless, imageNoisy, alpha=0.0875, gamma=0.5, likelihood="gaussian", prior="huber")
-	grid_search(gamma_start = 0, gamma_end=4, gamma_increment = 0.5, alpha_start=0, alpha_end=1, alpha_increment=0.05, prior="huber", likelihood="gaussian")
+	# optimize(imageNoiseless, imageNoisy, alpha=0.0875, gamma=0.5, likelihood="gaussian", prior="quadratic")
+	grid_search(imageNoiseless, imageNoisy, gamma_start = 1, gamma_end=10, alpha_start=0, alpha_end=1, prior="quadratic", likelihood="gaussian")
 
 
 
