@@ -17,7 +17,7 @@ def normalize_image(image):
 
 
 def optimize(x_true ,y_observed, step_size=1e-2, iterations=150, alpha=0.5, gamma=0, likelihood="gaussian", prior="quadratic"):
-	print(prior)
+	# print(f"ALpha : {alpha}")
 	max_threshold = 2.5
 	min_threshold = 0.001
 	max_step_size = 1e-1
@@ -80,18 +80,18 @@ def grid_search(imageNoiseless, imageNoisy, gamma_start = 0, gamma_end=0, alpha_
 	alpha_optimal = 0
 	gamma_optimal = 0
 	gamma = 0
-	for alpha in np.linspace(alpha_start, alpha_end, 10):
+	for alpha in np.linspace(alpha_start, alpha_end, 100):
 		if prior != "quadratic":
 			for gamma in np.linspace(gamma_start, gamma_end, 10):
-				x_estimate, new_log_posterior, current_rrmse = optimize(imageNoiseless, imageNoisy, alpha, gamma, likelihood, prior)
-				print(current_rrmse)
+				x_estimate, new_log_posterior, current_rrmse = optimize(imageNoiseless, imageNoisy, alpha = alpha, gamma = gamma, likelihood = likelihood, prior = prior)
+				# print(current_rrmse)
 				if current_rrmse < rrmse:
 					rrmse = current_rrmse
 					alpha_optimal = alpha
 					gamma_optimal = gamma
 		else:
-			print(f"ELse : {prior}")
-			x_estimate, new_log_posterior, current_rrmse = optimize(imageNoiseless, imageNoisy, alpha, gamma, likelihood, prior)
+			# print(f'prior : {prior} | alpha : {type(alpha_optimal)} | gamma : {gamma_optimal} | RRMSE : {rrmse}')
+			x_estimate, new_log_posterior, current_rrmse = optimize(imageNoiseless, imageNoisy, alpha = alpha, gamma = gamma, likelihood = likelihood, prior = prior)
 			# print(current_rrmse)
 			if current_rrmse < rrmse:
 				rrmse = current_rrmse
@@ -115,9 +115,9 @@ if __name__ == "__main__":
 
 	imageNoiseless, imageNoisy = normalize_image(imageNoiseless), normalize_image(imageNoisy)
 
-	# optimize(imageNoiseless, imageNoisy, alpha=0.0875, gamma=0.5, likelihood="gaussian", prior="quadratic")
-	grid_search(imageNoiseless, imageNoisy, gamma_start = 1, gamma_end=10, alpha_start=0, alpha_end=1, prior="quadratic", likelihood="gaussian")
-
+	# optimize(imageNoiseless, imageNoisy, alpha=0.0, gamma=0.5, likelihood="gaussian", prior="quadratic")
+	# grid_search(imageNoiseless, imageNoisy, gamma_start = 1, gamma_end=10, alpha_start=0, alpha_end=1, prior="quadratic", likelihood="gaussian")
+	grid_search(imageNoiseless, imageNoisy, gamma_start = 1, gamma_end=10, alpha_start=0, alpha_end=1, prior="huber", likelihood="gaussian")
 
 
 
