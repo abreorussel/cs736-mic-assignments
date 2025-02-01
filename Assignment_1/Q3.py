@@ -159,7 +159,7 @@ if __name__ == "__main__":
 		os.makedirs(results_folder)
 		print(f'Folder "{results_folder}" created.')
 
-	optimize(imageNoiseless, imageNoisy, alpha=0.08, gamma=0.5, likelihood="gaussian", prior="huber-l1")
+	# optimize(imageNoiseless, imageNoisy, alpha=0.08, gamma=0.5, likelihood="gaussian", prior="huber-l1")
 	# grid_search(imageNoiseless, imageNoisy, gamma_start = 0, gamma_end=0.2, alpha_start=0, alpha_end=1, prior="quadratic", likelihood="gaussian")
 	
 
