@@ -144,6 +144,7 @@ if __name__ == "__main__":
 	# grid_search(imageNoiseless, imageNoisy, gamma_start = 1, gamma_end=10, alpha_start=0, alpha_end=1, prior="huber", likelihood="gaussian")
 	# grid_search(imageNoiseless, imageNoisy, gamma_start = 1, gamma_end=10, alpha_start=0, alpha_end=1, prior="huber", likelihood="gaussian")
 
-	# check_nearby_parameters(alpha=0.1122, gamma=0, prior="quadratic") 
-	# check_nearby_parameters(alpha=0.4371, gamma=0.06331, prior="huber") 
-	# check_nearby_parameters(alpha=0.1122, gamma=0, prior="adaptive")
+
+	check_nearby_parameters(alpha=0.142284, gamma=0, prior="quadratic") 
+	check_nearby_parameters(alpha=0.47034719, gamma=0.064320, prior="huber") 
+	check_nearby_parameters(alpha=0.5607599, gamma=0.0723584, prior="adaptive")
