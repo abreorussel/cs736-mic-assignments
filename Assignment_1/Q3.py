@@ -7,20 +7,17 @@ import os
 from config import *
 from model import *
 
+def normalize_image(image):
+	image = np.array(image)
+	return ( image - np.min(image) ) / ( np.max(image) - np.min(image) )
 
 def display_image(image):
+	plt.figure()
 	plt.imshow(image)
 	plt.show()
 	# print(image)
 
 def optimize(x_true ,y_observed, step_size=1e-2, iterations=200, alpha=0.5, gamma=0, likelihood="gaussian", prior="quadratic", print_log = True):
-	# print(f"ALpha : {alpha}")
-	max_threshold = 2.5
-	min_threshold = 0.01
-	max_step_size = 1e-1
-	min_step_size = 1e-5
-	increase_factor = 1.1  # Increase step size by 5% if improvement is large\
-	decrease_factor = 0.5
 	
 	x_estimate = y_observed.copy()
 	log_posterior_values = list()
@@ -35,11 +32,6 @@ def optimize(x_true ,y_observed, step_size=1e-2, iterations=200, alpha=0.5, gamm
 	for it in range(1, iterations+1):
 		x_estimate += step_size * log_posterior_grad
 		new_log_posterior, new_log_posterior_grad = calculate_posterior(x_estimate, y_observed, alpha, gamma, likelihood=likelihood, prior=prior)
-
-		# if new_log_posterior/initial_log_posterior > 1:
-		# 	step_size *= 1.1
-		# else:
-		# 	step_size *= 0.5
 
 		percentage_change = (new_log_posterior - initial_log_posterior) / abs(initial_log_posterior)
 		if new_log_posterior >= initial_log_posterior:
@@ -74,7 +66,7 @@ def grid_search(imageNoiseless, imageNoisy, gamma_start = 0, gamma_end=0, alpha_
 	gamma = 0.16
 	# alpha = 0.6482
 
-	for alpha in np.linspace(alpha_start, alpha_end, 500):
+	for alpha in np.linspace(alpha_start, alpha_end, 200):
 	# for gamma in np.linspace(gamma_start, gamma_end, 200):
 		if mode != "optimize":
 			for gamma in np.linspace(gamma_start, gamma_end, 10):
@@ -92,14 +84,14 @@ def grid_search(imageNoiseless, imageNoisy, gamma_start = 0, gamma_end=0, alpha_
 	
 
 	print(f"############################# Optimal Values #################################")
-	print(f'prior : {prior} | alpha : {alpha_optimal:.4f} | gamma : {gamma_optimal:.4f} | log posterior : {new_log_posterior:.4f} | RRMSE : {rrmse:.4f}')
+	print(f'prior : {prior} | alpha : {alpha_optimal} | gamma : {gamma_optimal} | log posterior : {new_log_posterior:.4f} | RRMSE : {rrmse}')
 
 def check_nearby_parameters(alpha =0 , gamma = 0, prior ="quadratic"):
 	increased_alpha = alpha
 	if 1.2 * alpha < 1:
 		increased_alpha = alpha * 1.2
 		
-	if prior == "quadratic":
+	if prior in ["square-l2", "l2"]:
 		_, _, rrmse_optimal, _ = optimize(imageNoiseless, imageNoisy, alpha=alpha, gamma=gamma, likelihood="gaussian", prior=prior ,print_log =False)
 		_, _, rrmse1, _ = optimize(imageNoiseless, imageNoisy, alpha=increased_alpha, gamma=gamma, likelihood="gaussian", prior=prior, print_log=False)
 		_, _, rrmse2, _ = optimize(imageNoiseless, imageNoisy, alpha=0.8*alpha, gamma=gamma, likelihood="gaussian", prior=prior, print_log=False)
@@ -124,17 +116,19 @@ def check_nearby_parameters(alpha =0 , gamma = 0, prior ="quadratic"):
 
 
 def save_image(directory, image, filename):
+	plt.figure(figsize=(8, 5))
 	plt.imshow(image, cmap="jet")
 	# plt.imshow((image * 255).astype(np.int32))
 	plt.grid(False)
 	plt.savefig(os.path.join(directory, f'{filename}.png'))
+	plt.close()
 
-def save_all_images(imageNoiseless, imageNoisy, x_estimate_quadratic, x_estimate_huber, x_estimate_adaptive):
+def save_all_images(imageNoiseless, imageNoisy, x_estimate_squared_l2, x_estimate_l2, x_estimate_huber_reg_l1):
 	save_image(results_folder, imageNoiseless,  "image_noiseless")
 	save_image(results_folder, imageNoisy,  "image_noisy")
-	save_image(results_folder, x_estimate_quadratic,  "x_estimate_quadratic")
-	save_image(results_folder, x_estimate_huber,  "x_estimate_huber")
-	save_image(results_folder, x_estimate_adaptive,  "x_estimate_adaptive")
+	save_image(results_folder, x_estimate_squared_l2,  "x_estimate_squared_l2")
+	save_image(results_folder, x_estimate_l2,  "x_estimate_l2")
+	save_image(results_folder, x_estimate_huber_reg_l1,  "x_estimate_huber_reg_l1")
 
 def construct_graph(iterations, function_values, title, filename, directory):
 	# print(function_values)
@@ -146,6 +140,7 @@ def construct_graph(iterations, function_values, title, filename, directory):
 	plt.grid(True)
 	# plt.show()
 	plt.savefig(os.path.join(directory, f'{filename}.png'))
+	plt.close()
 
 if __name__ == "__main__":
 	
@@ -159,25 +154,28 @@ if __name__ == "__main__":
 		os.makedirs(results_folder)
 		print(f'Folder "{results_folder}" created.')
 
-	# optimize(imageNoiseless, imageNoisy, alpha=0.08, gamma=0.5, likelihood="gaussian", prior="huber-l1")
-	# grid_search(imageNoiseless, imageNoisy, gamma_start = 0, gamma_end=0.2, alpha_start=0, alpha_end=1, prior="quadratic", likelihood="gaussian")
+	imageNoiseless, imageNoisy = normalize_image(imageNoiseless), normalize_image(imageNoisy)
+
+	# optimize(imageNoiseless, imageNoisy, alpha=0.8, gamma=0.5, likelihood="gaussian", prior="square-l2")
+	# grid_search(imageNoiseless, imageNoisy, gamma_start = 0, gamma_end=0.2, alpha_start=0, alpha_end=1, prior="square-l2", likelihood="gaussian")
 	
 
-	# check_nearby_parameters(alpha=0.1062, gamma=0, prior="square-l2")
-	# check_nearby_parameters(alpha=0.9661248, gamma=0.04165632, prior="l2") 
-	# check_nearby_parameters(alpha=0.6482, gamma=0.07939, prior="huber-l1")
+	# To check 20% above and below optimal parameters
+	# check_nearby_parameters(alpha=0.5477, gamma=0, prior="square-l2")
+	# check_nearby_parameters(alpha=0.0955, gamma=0.04165632, prior="l2") 
+	# check_nearby_parameters(alpha=0.4545, gamma=0.1558, prior="huber-l1")
 
 
 	# Best Estimates
-	# x_estimate_quadratic, new_log_posterior_quadratic, current_rrmse_quadratic, log_posterior_values_quadratic = optimize(imageNoiseless, imageNoisy, alpha=0.1062, gamma=0, likelihood="gaussian", prior="square-l2", print_log=False)
-	# x_estimate_huber, new_log_posterior_huber, current_rrmse_huber, log_posterior_values_huber = optimize(imageNoiseless, imageNoisy, alpha=0.9661248, gamma=0.04165632, likelihood="gaussian", prior="l2", print_log=False)
-	# x_estimate_adaptive, new_log_posterior_adaptive, current_rrmse_adaptive, log_posterior_values_adaptive = optimize(imageNoiseless, imageNoisy, alpha=0.6482, gamma=0.07939, likelihood="gaussian", prior="huber-l1", print_log=False)
+	# x_estimate_square_l2, new_log_posterior_square_l2, current_rrmse_square_l2, log_posterior_values_square_l2 = optimize(imageNoiseless, imageNoisy, alpha=0.5477, gamma=0, likelihood="gaussian", prior="square-l2", print_log=False)
+	# x_estimate_l2, new_log_posterior_l2, current_rrmse_l2, log_posterior_values_l2 = optimize(imageNoiseless, imageNoisy, alpha=0.0955, gamma=0.04165632, likelihood="gaussian", prior="l2", print_log=False)
+	# x_estimate_huber_l1, new_log_posterior_huber_l1, current_rrmse_huber_l1, log_posterior_values_huber_l1 = optimize(imageNoiseless, imageNoisy, alpha=0.4545, gamma=0.1558, likelihood="gaussian", prior="huber-l1", print_log=False)
 	
-	
-	# save_all_images(imageNoiseless, imageNoisy, x_estimate_quadratic, x_estimate_huber, x_estimate_adaptive)
+	#Get all plots and respective images
+	# save_all_images(imageNoiseless, imageNoisy, x_estimate_square_l2, x_estimate_l2, x_estimate_huber_l1)
 
-	# construct_graph(iterations=200, function_values=log_posterior_values_quadratic, title="Objective Function vs Iterations : Squared L2 norm", filename="quadratic_plot", directory=results_folder )
-	# construct_graph(iterations=200, function_values=log_posterior_values_huber, title="Objective Function vs Iterations : L2 norm", filename="huber_plot", directory=results_folder )
-	# construct_graph(iterations=200, function_values=log_posterior_values_adaptive, title="Objective Function vs Iterations : HUber regularized L1", filename="adaptive_plot", directory=results_folder )
+	# construct_graph(iterations=200, function_values=log_posterior_values_square_l2, title="Objective Function vs Iterations : Squared L2 norm", filename="squared_l2_plot", directory=results_folder )
+	# construct_graph(iterations=200, function_values=log_posterior_values_l2, title="Objective Function vs Iterations : L2 norm", filename="l2_plot", directory=results_folder )
+	# construct_graph(iterations=200, function_values=log_posterior_values_huber_l1, title="Objective Function vs Iterations : Huber regularized L1", filename="huber_reg_l1_plot", directory=results_folder )
 
 

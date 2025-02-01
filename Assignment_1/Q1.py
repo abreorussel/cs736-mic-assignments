@@ -8,18 +8,12 @@ from model import *
 
 
 def display_image(image):
+	plt.figure()
 	plt.imshow(image)
 	plt.show()
 	# print(image)
 
 def optimize(x_true ,y_observed, step_size=1e-2, iterations=200, alpha=0.5, gamma=0, likelihood="gaussian", prior="quadratic", print_log = True):
-	# print(f"ALpha : {alpha}")
-	max_threshold = 2.5
-	min_threshold = 0.01
-	max_step_size = 1e-1
-	min_step_size = 1e-5
-	increase_factor = 1.1  # Increase step size by 5% if improvement is large\
-	decrease_factor = 0.5
 	
 	x_estimate = y_observed.copy()
 	log_posterior_values = list()
@@ -34,11 +28,6 @@ def optimize(x_true ,y_observed, step_size=1e-2, iterations=200, alpha=0.5, gamm
 	for it in range(1, iterations+1):
 		x_estimate += step_size * log_posterior_grad
 		new_log_posterior, new_log_posterior_grad = calculate_posterior(x_estimate, y_observed, alpha, gamma, likelihood=likelihood, prior=prior)
-
-		# if new_log_posterior/initial_log_posterior > 1:
-		# 	step_size *= 1.1
-		# else:
-		# 	step_size *= 0.5
 
 		percentage_change = (new_log_posterior - initial_log_posterior) / abs(initial_log_posterior)
 		if new_log_posterior >= initial_log_posterior:
@@ -123,10 +112,12 @@ def check_nearby_parameters(alpha =0 , gamma = 0, prior ="quadratic"):
 
 
 def save_image(directory, image, filename):
+	plt.figure(figsize=(8, 5))
 	plt.imshow(image, cmap="jet")
 	# plt.imshow((image * 255).astype(np.int32))
 	plt.grid(False)
 	plt.savefig(os.path.join(directory, f'{filename}.png'))
+	plt.close()
 
 def save_all_images(imageNoiseless, imageNoisy, x_estimate_quadratic, x_estimate_huber, x_estimate_adaptive):
 	save_image(results_folder, imageNoiseless,  "image_noiseless")
@@ -145,6 +136,7 @@ def construct_graph(iterations, function_values, title, filename, directory):
 	plt.grid(True)
 	# plt.show()
 	plt.savefig(os.path.join(directory, f'{filename}.png'))
+	plt.close()
 
 
 if __name__ == "__main__":
@@ -162,7 +154,7 @@ if __name__ == "__main__":
 	# optimize(imageNoiseless, imageNoisy, alpha=0.4371, gamma=0.06331, likelihood="gaussian", prior="huber")
 	# grid_search(imageNoiseless, imageNoisy, gamma_start = 0, gamma_end=0.2, alpha_start=0, alpha_end=1, prior="quadratic", likelihood="gaussian")
 	
-
+	# To check 20% above and below optimal parameters
 	# check_nearby_parameters(alpha=0.1062, gamma=0, prior="quadratic")
 	# check_nearby_parameters(alpha=0.9661248, gamma=0.04165632, prior="huber") 
 	# check_nearby_parameters(alpha= 0.9334079, gamma=0.040647680, prior="adaptive")
@@ -173,7 +165,7 @@ if __name__ == "__main__":
 	# x_estimate_huber, new_log_posterior_huber, current_rrmse_huber, log_posterior_values_huber = optimize(imageNoiseless, imageNoisy, alpha=0.9661248, gamma=0.04165632, likelihood="gaussian", prior="huber", print_log=False)
 	# x_estimate_adaptive, new_log_posterior_adaptive, current_rrmse_adaptive, log_posterior_values_adaptive = optimize(imageNoiseless, imageNoisy, alpha= 0.9334079, gamma=0.040647680, likelihood="gaussian", prior="adaptive", print_log=False)
 	
-	
+	# Get all the plots and respective images
 	# save_all_images(imageNoiseless, imageNoisy, x_estimate_quadratic, x_estimate_huber, x_estimate_adaptive)
 
 	# construct_graph(iterations=200, function_values=log_posterior_values_quadratic, title="Objective Function vs Iterations : Quadratic", filename="quadratic_plot", directory=results_folder )

@@ -15,7 +15,7 @@ def display_images(original, noisy, denoised, titles=["Original Image", "Simulat
 	
 	for i in range(3):
 		plt.subplot(1, 3, i + 1)
-		plt.imshow(images[i], cmap='jet')
+		plt.imshow(images[i])
 		plt.title(titles[i])
 		plt.axis('off')  # Hide axes
 
@@ -26,6 +26,7 @@ def display_images(original, noisy, denoised, titles=["Original Image", "Simulat
 
 
 def construct_graph(iterations, function_values, title, filename, directory):
+	plt.figure(figsize=(8, 5))
 	# print(function_values)
 	plt.figure(figsize=(8, 5))
 	plt.plot(list(range(1,iterations+1)), function_values, marker='o', linestyle='-', color='b', markersize=4)
@@ -35,8 +36,10 @@ def construct_graph(iterations, function_values, title, filename, directory):
 	plt.grid(True)
 	# plt.show()
 	plt.savefig(os.path.join(directory, f'{filename}.png'))
+	plt.close()
 
 def plot_histogram(coeffs, p, directory):
+	plt.figure(figsize=(8, 5))
 	plt.figure(figsize=(8, 5))
 	plt.hist(coeffs, bins=100, log=True, range=(-0.1, 0.1), alpha=0.7)
 	plt.xlabel("Coefficient Value")
@@ -48,14 +51,17 @@ def plot_histogram(coeffs, p, directory):
 
 
 def display_image(image):
+	plt.figure()
 	plt.imshow(image)
 	plt.show()
 
 def save_image(directory, image, filename):
-	plt.imshow(image, cmap="jet")
+	plt.figure()
+	plt.imshow(image)
 	# plt.imshow((image * 255).astype(np.int32))
 	plt.grid(False)
 	plt.savefig(os.path.join(directory, f'{filename}.png'))
+	plt.close()
 
 def normalize_image(image):
 	image = np.array(image)
@@ -181,7 +187,7 @@ def alternate_minimization(X, D_init, R_init, lambda_reg=0.1, p=1, lr_D=0.01, lr
 			print(f"Converged at iteration {i}")
 			break
 
-	construct_graph(max_iter, loss_values, "Objective function versus Iterations", f"dictionary_learning_p{p}",results_folder )
+	construct_graph(max_iter, loss_values, f"Objective function versus Iterations: p = {p}", f"dictionary_learning_p{p}",results_folder )
 	coeffs = R.flatten()
 	plot_histogram(coeffs, p, "images/")
 	return D, R
@@ -194,6 +200,7 @@ def noise_addition(image, mean=0):
 	noisy_image = image +  gaussian_noise
 	if image.dtype == np.uint8:
 		noisy_image = np.clip(noisy_image, 0, 1).astype(np.uint8)
+	noisy_image = normalize_image(noisy_image)
 	return noisy_image
 
 
@@ -228,7 +235,37 @@ def denoise_using_D(noisy_image, D, R, max_iter=100, lambda_reg=0.2, lr_R=0.001,
 
 	return denoised_image
 
+def reconstruct_dictionary_atoms(D, image_shape, directory, filename, grid_shape=None):
 
+	N, M = D.shape  
+	
+	h, w = image_shape 
+	assert N == h * w, "Incorrect image shape!"
+
+	
+	if grid_shape is None:
+		grid_rows = int(np.floor(np.sqrt(M)))
+		grid_cols = int(np.ceil(M / grid_rows))
+	else:
+		grid_rows, grid_cols = grid_shape
+	
+	fig, axes = plt.subplots(grid_rows, grid_cols, figsize=(grid_cols * 2, grid_rows * 2))
+	axes = axes.flatten() 
+
+	for i in range(M):
+		img = D[:, i].reshape(image_shape)  
+		axes[i].imshow(img, cmap="gray")
+		axes[i].axis("off")
+
+
+	for i in range(M, len(axes)):
+		axes[i].axis("off")
+
+	plt.tight_layout()
+	# plt.show()
+	plt.savefig(os.path.join(directory, f'{filename}.png'))
+
+		
 
 if __name__ == "__main__":
 	K = 64
@@ -258,8 +295,9 @@ if __name__ == "__main__":
 		columns.append(var_patches[i][1].flatten())
 	
 	D =	np.column_stack(columns)
+	reconstruct_dictionary_atoms(D, (8,8), directory=results_folder,filename="initial_dictionary")
 	R = np.zeros((K, len(var_patches)))
-	R = np.random.rand(K, len(var_patches))
+	# R = np.random.rand(K, len(var_patches))
 
 	xcols = []
 
@@ -267,21 +305,26 @@ if __name__ == "__main__":
 		xcols.append(patch.flatten())
 	X = np.column_stack(xcols)
 
-	# # [2, 1.6, 1.2, 0.8]
-	D8 = None
-	for p in [2, 1.6, 1.2, 0.8]:
-		D, R = alternate_minimization(X, D, R, lambda_reg=0.2, p=p, lr_D=0.001, lr_R=0.001, 
-						   max_iter=1000, tol=1e-6)
-		if p == 0.8:
-			D8 = D
-
 	noisy_image =  noise_addition(image=normalize_image(chestCT['imageChestCT']))
 	save_image(results_folder, noisy_image, "simulated-noisy-image")
 
+	D8 = None
+	# [2, 1.6, 1.2, 0.8]
+	for p in [2, 1.6, 1.2, 0.8]:
+		D, R = alternate_minimization(X, D, R, lambda_reg=0.2, p=p, lr_D=0.001, lr_R=0.001, 
+						   max_iter=2000, tol=1e-6)
+		
+		reconstruct_dictionary_atoms(D, (8,8), directory=results_folder,filename=f"learnt_dictionary_p{p}")
+		
+		if p == 0.8:
+			D8 = D
+
+
 	print(f"Initital RRMSE : {rrmse(normalize_image(chestCT['imageChestCT']), noisy_image)}")
 
-	denoised_img = denoise_using_D(noisy_image, D8, R,  max_iter=1000, lambda_reg=0.2, lr_R=0.001, p= 0.8, tol=1e-6)
+	denoised_img = denoise_using_D(noisy_image, D8, R,  max_iter=2000, lambda_reg=0.2, lr_R=0.001, p= 0.8, tol=1e-6)
 
+	print(f"Pre denoising RRMSE : {rrmse(normalize_image(chestCT['imageChestCT']), noisy_image)}")
 	print(f"Post denoising RRMSE : {rrmse(normalize_image(chestCT['imageChestCT']), denoised_img)}")
 	save_image(results_folder, denoised_img, "denoised-image")
 	display_images(original=image, noisy=noisy_image, denoised=denoised_img, directory=results_folder, filename="all_three_images")
