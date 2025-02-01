@@ -189,7 +189,7 @@ def alternate_minimization(X, D_init, R_init, lambda_reg=0.1, p=1, lr_D=0.01, lr
 
 	construct_graph(max_iter, loss_values, f"Objective function versus Iterations: p = {p}", f"dictionary_learning_p{p}",results_folder )
 	coeffs = R.flatten()
-	plot_histogram(coeffs, p, "images/")
+	plot_histogram(coeffs, p, results_folder)
 	return D, R
 	
 
