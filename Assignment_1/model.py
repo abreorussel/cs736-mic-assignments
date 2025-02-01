@@ -53,7 +53,7 @@ def calc_huber_prior(x, gamma=0):
 
 	def huber(diff, gamma):
 		abs_diff = np.abs(diff) 
-		return np.where(abs_diff <= gamma, 0.5 * (diff ** 2), gamma * abs_diff - 0.5 * (gamma ** 2))
+		return np.where(abs_diff <= gamma, 0.5 * (diff ** 2), (gamma * abs_diff) - 0.5 * (gamma ** 2))
 	
 	def huber_grad(diff, gamma):
 		abs_diff = np.abs(diff) 
@@ -178,31 +178,32 @@ def calculate_posterior(x, y, alpha=0.5, gamma = 0, likelihood="gaussian", prior
 	# prior, prior_grad = calc_quadratic_prior(x)
 	# prior, prior_grad = calc_huber_prior(x, gamma)
 	
-    likelihood_mapping = {
+	likelihood_mapping = {
 		"gaussian": gaussian_likelihood,
-    }
+	}
 
-    prior_mapping = {
+	prior_mapping = {
 		"quadratic":calc_quadratic_prior,
 		"huber": calc_huber_prior,
 		"adaptive":calc_adaptive_prior,
 		"square-l2": calc_square_l2_prior,
 		"l2": calc_l2_prior,
 		"huber-l1": calc_huber_l1_prior
-    }
+	}
 	
-    likelihood_fn = likelihood_mapping[likelihood]
-    prior_fn = prior_mapping[prior]
+	likelihood_fn = likelihood_mapping[likelihood]
+	prior_fn = prior_mapping[prior]
 	
-    prior, prior_grad = prior_fn(x, gamma)
-    likelihood, likelihood_grad = likelihood_fn(x, y)
+	prior, prior_grad = prior_fn(x, gamma)
+	
+	likelihood, likelihood_grad = likelihood_fn(x, y)
 
-    log_posterior = alpha*(prior) + (1 - alpha)*likelihood
-    log_posterior_grad = alpha*(prior_grad) + (1 - alpha)*likelihood_grad
+	log_posterior = alpha*(prior) + (1 - alpha)*likelihood
+	log_posterior_grad = alpha*(prior_grad) + (1 - alpha)*likelihood_grad
 	
-    # print(log_posterior)
+	# print(log_posterior)
 
-    return log_posterior, log_posterior_grad
+	return log_posterior, log_posterior_grad
 
 
 def rrmse(A,B):
