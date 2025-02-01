@@ -175,8 +175,6 @@ def calc_huber_l1_prior(x, gamma=0):
 
 
 def calculate_posterior(x, y, alpha=0.5, gamma = 0, likelihood="gaussian", prior="quadratic"):
-	# prior, prior_grad = calc_quadratic_prior(x)
-	# prior, prior_grad = calc_huber_prior(x, gamma)
 	
 	likelihood_mapping = {
 		"gaussian": gaussian_likelihood,
