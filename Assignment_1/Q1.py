@@ -163,15 +163,15 @@ if __name__ == "__main__":
 	# grid_search(imageNoiseless, imageNoisy, gamma_start = 0, gamma_end=0.2, alpha_start=0, alpha_end=1, prior="quadratic", likelihood="gaussian")
 	
 
-	check_nearby_parameters(alpha=0.1062, gamma=0, prior="quadratic")
-	check_nearby_parameters(alpha=0.9661248, gamma=0.04165632, prior="huber") 
-	check_nearby_parameters(alpha=0.6482, gamma=0.07939, prior="adaptive")
+	# check_nearby_parameters(alpha=0.1062, gamma=0, prior="quadratic")
+	# check_nearby_parameters(alpha=0.9661248, gamma=0.04165632, prior="huber") 
+	# check_nearby_parameters(alpha= 0.9334079, gamma=0.040647680, prior="adaptive")
 
 
 	# Best Estimates
 	# x_estimate_quadratic, new_log_posterior_quadratic, current_rrmse_quadratic, log_posterior_values_quadratic = optimize(imageNoiseless, imageNoisy, alpha=0.1062, gamma=0, likelihood="gaussian", prior="quadratic", print_log=False)
 	# x_estimate_huber, new_log_posterior_huber, current_rrmse_huber, log_posterior_values_huber = optimize(imageNoiseless, imageNoisy, alpha=0.9661248, gamma=0.04165632, likelihood="gaussian", prior="huber", print_log=False)
-	# x_estimate_adaptive, new_log_posterior_adaptive, current_rrmse_adaptive, log_posterior_values_adaptive = optimize(imageNoiseless, imageNoisy, alpha=0.6482, gamma=0.07939, likelihood="gaussian", prior="adaptive", print_log=False)
+	# x_estimate_adaptive, new_log_posterior_adaptive, current_rrmse_adaptive, log_posterior_values_adaptive = optimize(imageNoiseless, imageNoisy, alpha= 0.9334079, gamma=0.040647680, likelihood="gaussian", prior="adaptive", print_log=False)
 	
 	
 	# save_all_images(imageNoiseless, imageNoisy, x_estimate_quadratic, x_estimate_huber, x_estimate_adaptive)
