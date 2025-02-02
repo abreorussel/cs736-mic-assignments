@@ -1,0 +1,74 @@
+Q1. 
+
+prior : quadratic | alpha : 0.1062
+Optimal RRMSE : 0.28108059168712535
+1.2 times alpha RRMSE : 0.28141335415167334
+0.8 times alpha RRMSE : 0.281539370013863
+
+
+prior : huber | alpha : 0.9661248 | gamma : 0.04165632
+Optimal RRMSE : 0.24063097205397913 
+1.2 times alpha RRMSE : 0.24063097205397913 
+0.8 times alpha RRMSE : 0.24281844862636928 
+1.2 times gamma RRMSE : 0.24110136620855444 
+0.8 times gamma RRMSE : 0.24075040371223433 
+
+
+prior : adaptive | alpha : 0.9334079 | gamma : 0.04064768
+Optimal RRMSE : 0.2449254375285829 
+1.2 times alpha RRMSE : 0.2449254375285829 
+0.8 times alpha RRMSE : 0.24952734177646926 
+1.2 times gamma RRMSE : 0.24493807160910333
+0.8 times gamma RRMSE : 0.2455219351038825
+
+
+Q2.
+
+prior : quadratic | alpha : 0.142284
+Optimal RRMSE : 0.12206261346130096 
+1.2 times alpha RRMSE : 0.12246074303925467 
+0.8 times alpha RRMSE : 0.12255799922639946 
+
+
+prior : huber | alpha : 0.47034719 | gamma : 0.06432
+Optimal RRMSE : 0.11421515927941676 
+1.2 times alpha RRMSE : 0.11446442544292536 
+0.8 times alpha RRMSE : 0.11602291276719391 
+1.2 times gamma RRMSE : 0.11459645892710356 
+0.8 times gamma RRMSE : 0.1145806013896687
+
+
+prior : adaptive | alpha : 0.5607599 | gamma : 0.0723584
+Optimal RRMSE : 0.11517651235958389
+1.2 times alpha RRMSE : 0.11518162849726918
+0.8 times alpha RRMSE : 0.11749592085483723
+1.2 times gamma RRMSE : 0.11528832826117892
+0.8 times gamma RRMSE : 0.11548534284864029
+
+Q3.
+
+prior : square-l2 | alpha : 0.5477
+Optimal RRMSE : 0.1770140871564018
+1.2 times alpha RRMSE : 0.17712160458981174
+0.8 times alpha RRMSE : 0.1771841486187386
+
+
+prior : l2 | alpha : 0.0955
+Optimal RRMSE : 0.17743619002297603 
+1.2 times alpha RRMSE : 0.1776065129101818 
+0.8 times alpha RRMSE : 0.1776133345065632 
+
+
+prior : huber-l1 | alpha : 0.4545 | gamma : 0.1558
+Optimal RRMSE : 0.17738892047478366 
+1.2 times alpha RRMSE : 0.17755611036742727 
+0.8 times alpha RRMSE : 0.17771923908998805 
+1.2 times gamma RRMSE : 0.1774862621755852 
+0.8 times gamma RRMSE : 0.17756323497483917
+
+
+Q4.
+
+iter = 2000
+Pre denoising RRMSE : 0.7387143583080288
+Post denoising RRMSE : 0.6597227434705343
