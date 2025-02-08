@@ -26,11 +26,12 @@ def optimize(x_true ,y_observed, step_size=1e-2, iterations=200, alpha=0.5, gamm
 		print(f"Initial RRMSE between Noiseless and Noisy Image: {rrmse(x_true, x_estimate):.4f}")
 	
 	for it in range(1, iterations+1):
-		x_estimate += step_size * log_posterior_grad
+		
 		new_log_posterior, new_log_posterior_grad = calculate_posterior(x_estimate, y_observed, alpha, gamma, likelihood=likelihood, prior=prior)
 
 		percentage_change = (new_log_posterior - initial_log_posterior) / abs(initial_log_posterior)
 		if new_log_posterior >= initial_log_posterior:
+			x_estimate += step_size * log_posterior_grad
 			step_size = (1 - percentage_change) * step_size
 		else:
 			step_size = (1 + percentage_change) * step_size
