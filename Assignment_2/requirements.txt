@@ -1,3 +1,4 @@
 matplotlib==3.10.0
 numpy==2.2.2
+opencv_python==4.11.0.86
 skimage==0.0
