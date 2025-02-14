@@ -130,7 +130,6 @@ if __name__ == "__main__":
 	save_rrmse_plot(thetas ,rrmse_values_phantom, results_folder, f"rrmse_phantom")
 
 
-
 	# Save recontructed image
 	new_thetas = np.arange(optimal_theta_chestCT , optimal_theta_chestCT + 151, 1)
 	radon_transform = radon(image=chestCT_img, theta=new_thetas)
