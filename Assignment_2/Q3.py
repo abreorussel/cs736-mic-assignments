@@ -12,7 +12,7 @@ from tqdm import tqdm
 from filters import *
 from helper import *
 
-def myFilter(fft, filter, l_mul_factor=1):
+def myFilter(fft, filter, num_t_values, l_mul_factor=1):
 	filter_mapping = {
 		"ram_lak":ram_lak_filter,
 		"shepp_logan": shepp_logan_filter,
@@ -20,7 +20,7 @@ def myFilter(fft, filter, l_mul_factor=1):
 		"unfiltered": unfiltered 
 	}
 
-	filtered_fft = filter_mapping[filter](fft, 128, l_mul_factor)
+	filtered_fft = filter_mapping[filter](fft, num_t_values, l_mul_factor)
 	return filtered_fft
 
 
@@ -97,7 +97,7 @@ if __name__ == "__main__":
 		
 		fourier_1d = np.fft.fft(radon_transform, axis=0)
 		filter = "cosine"
-		filtered_fft = myFilter(fourier_1d, filter)
+		filtered_fft = myFilter(fourier_1d, filter, chestCT_img.shape[0] )
 
 		filtered_backprojection = np.fft.ifft(filtered_fft, axis = 0).real 
 		reconstructed_image = iradon(radon_image=filtered_backprojection, theta=new_thetas, filter_name=None)
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 		
 		fourier_1d = np.fft.fft(radon_transform, axis=0)
 		filter = "cosine"
-		filtered_fft = myFilter(fourier_1d, filter)
+		filtered_fft = myFilter(fourier_1d, filter, phantom_img.shape[0])
 
 		filtered_backprojection = np.fft.ifft(filtered_fft, axis = 0).real 
 		reconstructed_image = iradon(radon_image=filtered_backprojection, theta=new_thetas, filter_name=None)
@@ -135,8 +135,8 @@ if __name__ == "__main__":
 	new_thetas = np.arange(optimal_theta_chestCT , optimal_theta_chestCT + 151, 1)
 	radon_transform = radon(image=chestCT_img, theta=new_thetas)
 	fourier_1d = np.fft.fft(radon_transform, axis=0)
-	filter = "unfiltered"
-	filtered_fft = myFilter(fourier_1d, filter)
+	filter = "cosine"
+	filtered_fft = myFilter(fourier_1d, filter, chestCT_img.shape[0])
 	filtered_backprojection = np.fft.ifft(filtered_fft, axis = 0).real 
 	reconstructed_image = iradon(radon_image=filtered_backprojection, theta=new_thetas, filter_name=None)
 	rrmse_value = np.round(rrmse(chestCT_img, reconstructed_image), 4)
@@ -146,8 +146,8 @@ if __name__ == "__main__":
 	new_thetas = np.arange(optimal_theta_phantom , optimal_theta_phantom + 151, 1)
 	radon_transform = radon(image=phantom_img, theta=new_thetas)
 	fourier_1d = np.fft.fft(radon_transform, axis=0)
-	filter = "unfiltered"
-	filtered_fft = myFilter(fourier_1d, filter)
+	filter = "cosine"
+	filtered_fft = myFilter(fourier_1d, filter, phantom_img.shape[0])
 	filtered_backprojection = np.fft.ifft(filtered_fft, axis = 0).real 
 	reconstructed_image = iradon(radon_image=filtered_backprojection, theta=new_thetas, filter_name=None)
 	rrmse_value = np.round(rrmse(phantom_img, reconstructed_image), 4)
