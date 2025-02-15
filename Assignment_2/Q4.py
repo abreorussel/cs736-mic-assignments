@@ -108,11 +108,7 @@ def myART(A_batches, projections, image_size, iterations=10, lambda_val=1.0,
 				if l2_squared > 0:
 					x = x + lambda_val * (r / l2_squared) * A_batch[idx, :]
 			global_row_counter += n_rows
-		# At the end of this full iteration, compute RRMSE if ground truth is provided.
-		# if ground_truth is not None:
-		#     error = np.linalg.norm(x - ground_truth.flatten())
-		#     norm_true = np.linalg.norm(ground_truth.flatten())
-		#     rrmse = error / norm_true
+
 		rrmse_val = rrmse(ground_truth.flatten(), x)
 		rrmse_values.append(rrmse_val)
 		print(f"Iteration {it+1}: RRMSE = {rrmse_val:.4f}")
