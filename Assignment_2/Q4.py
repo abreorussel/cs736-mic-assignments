@@ -113,9 +113,9 @@ def myART(A_batches, projections, image_size, iterations=10, lambda_val=1.0,
 		#     error = np.linalg.norm(x - ground_truth.flatten())
 		#     norm_true = np.linalg.norm(ground_truth.flatten())
 		#     rrmse = error / norm_true
-		rrmse = rrmse(ground_truth.flatten(), x)
-		rrmse_values.append(rrmse)
-		print(f"Iteration {it+1}: RRMSE = {rrmse:.4f}")
+		rrmse_val = rrmse(ground_truth.flatten(), x)
+		rrmse_values.append(rrmse_val)
+		print(f"Iteration {it+1}: RRMSE = {rrmse_val:.4f}")
 	reconstructed_img = x.reshape(image_size, image_size)
 	return reconstructed_img, rrmse_values
 
