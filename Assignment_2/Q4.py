@@ -85,7 +85,7 @@ def save_radon_transform(transform, directory, filename):
 def myXrayCTRadonTransform(image, directory):
 	radon_transform = myXrayIntegration(image, delta_s=1, t_start=-90, t_end=91, t_delta=1, 
 										 theta_start=0, theta_end=180, theta_delta=1)
-	save_radon_transform(radon_transform, directory, "Q4_radon_transform")
+	# save_radon_transform(radon_transform, directory, "Q4_radon_transform")
 	return radon_transform
 
 
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
 	plt.figure(figsize=(8, 6))
 	for lambda_val in lambda_values:
-		print(f"\n--- Running ART with λ = {lambda_val:.1f} ---")
+		print(f"\n--------------  λ = {lambda_val:.1f} ---------------")
 		reconstructed_img, rrmse_history = myART(A_batches, noisy_projections, image_size=chestCT_img.shape[0],
 									 iterations=iterations, lambda_val=lambda_val,
 									 ordering=ordering, ground_truth=chestCT_img)
@@ -154,7 +154,7 @@ if __name__ == "__main__":
 		plt.legend()
 		plt.grid(True)
 		plt.savefig(os.path.join(results_folder, f"Q4_RRMSE_vs_Iterations_{lambda_val}.png"))
-		plt.show()
+		# plt.show()
 		plt.close()
 
 		plt.figure(figsize=(6, 6))
@@ -163,5 +163,5 @@ if __name__ == "__main__":
 		plt.axis("off")
 		plt.colorbar()
 		plt.savefig(os.path.join(results_folder, f"Q4_ART_reconstruction_{lambda_val}.png"))
-		plt.show()
+		# plt.show()
 		plt.close()

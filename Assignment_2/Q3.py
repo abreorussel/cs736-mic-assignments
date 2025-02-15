@@ -30,7 +30,7 @@ def display_image(image):
 
 def save_radon_transform(transform, directory, filename):
 	plt.figure(figsize=(8, 6))
-	plt.imshow(transform, extent=[-90, 90, 180, 0], aspect='auto')
+	plt.imshow(transform, extent=[-90, 90, 180, 0], cmap="jet", aspect='auto')
 	plt.xlabel("Projection Position (t)")
 	plt.ylabel("Angle (theta)")
 	plt.title("Radon Transform")
@@ -41,7 +41,7 @@ def save_radon_transform(transform, directory, filename):
 def save_1d_plot(transform, theta, directory, filename):
 	plt.figure(figsize=(4, 6))
 	projection = transform.reshape(-1, 1)
-	plt.imshow(projection, cmap='viridis', aspect='auto')
+	plt.imshow(projection, cmap='jet', aspect='auto')
 	plt.xlabel(f"theta = {theta}")
 	plt.ylabel("Intensity")
 	plt.colorbar()
@@ -62,7 +62,7 @@ def save_rrmse_plot(thetas ,rrmse_values, directory, filename):
 
 def save_image(image, directory, filename):
 	plt.figure()
-	plt.imshow(image)
+	plt.imshow(image, cmap="jet")
 	plt.title("Reconstructed Image")
 	plt.savefig(os.path.join(directory, f'{filename}.png'))
 	plt.close()

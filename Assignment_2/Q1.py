@@ -36,7 +36,7 @@ def display_image(image):
 
 def save_radon_transform(transform, directory, filename):
 	plt.figure(figsize=(8, 6))
-	plt.imshow(transform, extent=[-90, 90, 180, 0], aspect='auto')
+	plt.imshow(transform, extent=[-90, 90, 180, 0], aspect='auto', cmap="jet")
 	plt.xlabel("Projection Position (t)")
 	plt.ylabel("Angle (theta)")
 	plt.title("Radon Transform")
@@ -47,7 +47,7 @@ def save_radon_transform(transform, directory, filename):
 def save_1d_plot(transform, theta, directory, filename):
 	plt.figure(figsize=(4, 6))
 	projection = transform.reshape(-1, 1)
-	plt.imshow(projection, cmap='viridis', aspect='auto')
+	plt.imshow(projection, cmap='jet', aspect='auto')
 	plt.xlabel(f"theta = {theta}")
 	plt.ylabel("Intensity")
 	plt.colorbar()
@@ -71,15 +71,15 @@ if __name__ == "__main__":
 
 
 	#Q1c.
-	# delta_s = [0.5, 1, 3]
-	# for ds in delta_s:
-	# 	radon_transform = myXrayIntegration(phantom, delta_s=ds)
-	# 	save_radon_transform(radon_transform, results_folder, f"Q1c_radon_transform_delta_s_{ds}")
+	delta_s = [0.5, 1, 3]
+	for ds in delta_s:
+		radon_transform = myXrayIntegration(phantom, delta_s=ds)
+		save_radon_transform(radon_transform, results_folder, f"Q1c_radon_transform_delta_s_{ds}")
 
-	# 	radon_transform_theta_zero = myXrayIntegration(phantom, delta_s=ds, theta_start=0, theta_end=1, theta_delta=1)
-	# 	save_1d_plot(radon_transform_theta_zero, 0, results_folder, f"Q1c_radon_transform_delta_s_{ds}_theta_{0}")
+		radon_transform_theta_zero = myXrayIntegration(phantom, delta_s=ds, theta_start=0, theta_end=1, theta_delta=1)
+		save_1d_plot(radon_transform_theta_zero, 0, results_folder, f"Q1c_radon_transform_delta_s_{ds}_theta_{0}")
 
-	# 	radon_transform_theta_ninety = myXrayIntegration(phantom, delta_s=ds, theta_start=90, theta_end=91, theta_delta=1)
-	# 	save_1d_plot(radon_transform_theta_ninety, 90, results_folder, f"Q1c_radon_transform_delta_s_{ds}_theta_{90}")
+		radon_transform_theta_ninety = myXrayIntegration(phantom, delta_s=ds, theta_start=90, theta_end=91, theta_delta=1)
+		save_1d_plot(radon_transform_theta_ninety, 90, results_folder, f"Q1c_radon_transform_delta_s_{ds}_theta_{90}")
 
 	

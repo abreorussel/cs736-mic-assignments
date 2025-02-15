@@ -25,7 +25,7 @@ def myFilter(fft, filter, l_mul_factor=1):
 
 def save_radon_transform(transform, directory, filename):
 	plt.figure(figsize=(8, 6))
-	plt.imshow(transform, extent=[-90, 90, 180, 0], aspect='auto')
+	plt.imshow(transform, extent=[-90, 90, 180, 0], aspect='auto', cmap="jet")
 	plt.xlabel("Projection Position (t)")
 	plt.ylabel("Angle (theta)")
 	plt.title("Radon Transform")
@@ -35,7 +35,7 @@ def save_radon_transform(transform, directory, filename):
 
 def save_image(image, directory, filename):
 	plt.figure()
-	plt.imshow(image)
+	plt.imshow(image, cmap="jet")
 	plt.title("Reconstructed Image")
 	plt.savefig(os.path.join(directory, f'{filename}.png'))
 	plt.close()
@@ -71,19 +71,19 @@ if __name__ == "__main__":
 # Q2.a
 #---------------------------------------------------------------------------------------------------------------------
 	theta = np.arange(0, 178, 3)
-	radon_transform = radon(image=phantom, theta=theta)
-	# save_radon_transform(radon_transform, results_folder, f"radon")
-	fourier_1d = np.fft.fft(radon_transform, axis=0)
+	# radon_transform = radon(image=phantom, theta=theta)
+	# # save_radon_transform(radon_transform, results_folder, f"radon")
+	# fourier_1d = np.fft.fft(radon_transform, axis=0)
 	
-	filters = ["ram_lak", "shepp_logan", "cosine"]
-	l_factor = [1 , 0.5]
-	for filter in filters:
-		for l_mul in l_factor:
-			filtered_fft = myFilter(fourier_1d, filter, l_mul)
+	# filters = ["ram_lak", "shepp_logan", "cosine"]
+	# l_factor = [1 , 0.5]
+	# for filter in filters:
+	# 	for l_mul in l_factor:
+	# 		filtered_fft = myFilter(fourier_1d, filter, l_mul)
 
-			filtered_backprojection = np.fft.ifft(filtered_fft, axis = 0).real 
-			reconstructed_image = iradon(radon_image=filtered_backprojection, theta=theta, filter_name=None)
-			save_image(reconstructed_image, results_folder, f"reconstructed_image_{filter}_lvalue_{l_mul}")
+	# 		filtered_backprojection = np.fft.ifft(filtered_fft, axis = 0).real 
+	# 		reconstructed_image = iradon(radon_image=filtered_backprojection, theta=theta, filter_name=None)
+	# 		save_image(reconstructed_image, results_folder, f"reconstructed_image_{filter}_lvalue_{l_mul}")
 
 
 #--------------------------------------------------------------------------------------------------------------------
