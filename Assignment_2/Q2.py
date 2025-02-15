@@ -68,23 +68,26 @@ if __name__ == "__main__":
 	print(f"After Resize : {phantom.shape}")
 	
 #--------------------------------------------------------------------------------------------------------------------
-# Q1.a
+# Q2.a
 #---------------------------------------------------------------------------------------------------------------------
 	theta = np.arange(0, 178, 3)
-	# radon_transform = radon(image=phantom, theta=theta)
-	# # save_radon_transform(radon_transform, results_folder, f"radon")
+	radon_transform = radon(image=phantom, theta=theta)
+	# save_radon_transform(radon_transform, results_folder, f"radon")
+	fourier_1d = np.fft.fft(radon_transform, axis=0)
 	
-	# fourier_1d = np.fft.fft(radon_transform, axis=0)
-	# filter = "shepp_logan"
-	# filtered_fft = myFilter(fourier_1d, filter)
+	filters = ["ram_lak", "shepp_logan", "cosine"]
+	l_factor = [1 , 0.5]
+	for filter in filters:
+		for l_mul in l_factor:
+			filtered_fft = myFilter(fourier_1d, filter, l_mul)
 
-	# filtered_backprojection = np.fft.ifft(filtered_fft, axis = 0).real 
-	# reconstructed_image = iradon(radon_image=filtered_backprojection, theta=theta, filter_name=None)
-	# save_image(reconstructed_image, results_folder, f"reconstructed_image_{filter}")
+			filtered_backprojection = np.fft.ifft(filtered_fft, axis = 0).real 
+			reconstructed_image = iradon(radon_image=filtered_backprojection, theta=theta, filter_name=None)
+			save_image(reconstructed_image, results_folder, f"reconstructed_image_{filter}_lvalue_{l_mul}")
 
 
 #--------------------------------------------------------------------------------------------------------------------
-# Q1.b
+# Q2.b
 #--------------------------------------------------------------------------------------------------------------------
 
 	def getGaussianKernel(size, sigma):
@@ -130,9 +133,15 @@ if __name__ == "__main__":
 
 	# 	print(f"RRMSE for {image} : {rrmse(dict[image], reconstructed_image):.4f}")
 
+	'''
+		RRMSE for phantom : 0.6598
+		RRMSE for blurred_1 : 0.6594
+		RRMSE for blurred_5 : 0.7382
+	'''
+
 
 #--------------------------------------------------------------------------------------------------------------------
-# Q1.c
+# Q2.c
 #--------------------------------------------------------------------------------------------------------------------
 	l_values = np.arange(1 ,51, 1)
 	l_mul_factor = l_values * (1/50)
