@@ -170,8 +170,8 @@ def updateBiasField(Y, U, class_means, bias_field, weights, q, neigh_size, mask)
 def updateClassMeans(Y, U, class_means, bias_field, weights, q, neigh_size, mask):
 	new_class_means = class_means.copy()
 	for k in range(K):
-		# if k == 0:
-		#     continue
+		if k == 0 and unique_sol:
+			continue
 		numerator = 0.0
 		denominator = 0.0
 		
@@ -226,10 +226,19 @@ def save_image(image, directory, filename, title):
 	plt.close()
 
 if __name__ == "__main__":
+
+	unique_sol = True
 	results_folder = "results/Q1"
 	if not os.path.exists(results_folder):
 		os.makedirs(results_folder)
 		print(f'Folder "{results_folder}" created.')
+
+	if unique_sol :
+		results_folder = "results/Q1/uniqueSoln"
+		if not os.path.exists(results_folder):
+			os.makedirs(results_folder)
+			print(f'Folder "{results_folder}" created.')
+
 
 	losses = []
 	bias_field = None

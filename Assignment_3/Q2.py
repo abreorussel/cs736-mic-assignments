@@ -8,6 +8,40 @@ from numba import njit
 import os
 from sklearn.cluster import KMeans
 
+# def plot_before_after_icm_update(log_posterior_before, log_posterior_after, folder, filename, title):
+# 	plt.figure(figsize=(8, 6))
+# 	plt.plot(log_posterior_before, label='Log Posterior Before ICM', color='blue', marker='o')
+# 	plt.plot(log_posterior_after, label='Log Posterior After ICM', color='green', marker='x')
+
+# 	# Add labels, legend, and title
+# 	plt.xlabel('Iteration')
+# 	plt.ylabel('Log Posterior Value')
+# 	plt.title(title)
+# 	plt.legend()
+# 	plt.savefig(os.path.join(results_folder, f'{filename}.png'))
+# 	plt.close()
+
+
+def plot_before_after_icm_update(log_posterior_before, log_posterior_after, folder, filename, title):
+    plt.figure(figsize=(8, 6))
+    plt.plot(log_posterior_before, label='Log Posterior Before ICM', color='blue', marker='o')
+    plt.plot(log_posterior_after, label='Log Posterior After ICM', color='green', marker='x')
+
+    # Add labels, legend, and title
+    plt.xlabel('Iteration')
+    plt.ylabel('Log Posterior Value')
+    plt.title(title)
+    plt.legend()
+
+    # Set x-ticks at intervals of 5
+    plt.xticks(range(1, 101, 5))
+    plt.grid(True)
+
+    # Save and close the plot
+    plt.savefig(os.path.join(folder, f'{filename}.png'))
+    plt.close()
+
+
 
 def plotMemberships(U, filename, title):
 	plt.figure(figsize=(15, 7))
@@ -187,43 +221,54 @@ if __name__ == "__main__":
 		# print(f"Cluster {cluster} standard deviation: {std_devs[cluster]}")
 
 	X_map = kmeans.predict(flattened_y.reshape((-1,1))).reshape((Y.shape))
+	print(f"Initialization of Gaussian parameters\nMean = {means}\nstd = {list(std_devs.values())}")
 
 	# c
 	save_image(X_map*mask, results_folder, "initial_label_estimate", "Initial Label Image Estimate")
 
 
-
+	log_posterior_before_list = list()
+	log_posterior_after_list = list()
 	for iteration in range(max_iter):
 		print(f"Iteration {iteration + 1}")
 		log_posterior_before = compute_log_posterior(Y, X_map, means, std_devs)
+		log_posterior_before_list.append(log_posterior_before)
 		print(f"  Log Posterior Before ICM: {log_posterior_before:.4f}")
 
 		X_map = updateMapEstimate(Y, X_map, beta)
 
 		log_posterior_after = compute_log_posterior(Y, X_map, means, std_devs)
 		print(f"  Log Posterior After ICM: {log_posterior_after:.4f}")
+		log_posterior_after_list.append(log_posterior_after)
 
 		membership = updateMemberships(membership, X_map, Y, means, std_devs, beta)
 		means, std_devs = updateMeansAndVariances(Y, membership)
 
-		if abs(log_posterior_after - log_posterior_before) < 1e-8:
+		if abs(log_posterior_after - log_posterior_before) < 1e-5:
 			print("Converged!")
 			break
 
 	save_image(Y, results_folder, "corrupted_image", "Corrupted Image")
-	save_image(X_map*mask, results_folder, "optimal_label_estimate", "Optimal Label Image Estimate")
-	plotMemberships(membership, "optimal_membership", "Optimal Class Membership Estimate")
+	save_image(X_map*mask, results_folder, f"optimal_label_estimate_{beta}", "Optimal Label Image Estimate")
+	plotMemberships(membership, f"optimal_membership_{beta}", "Optimal Class Membership Estimate")
+	plot_before_after_icm_update(log_posterior_before_list, log_posterior_after_list, results_folder, f"before_after_icm_update_{beta}", "Log Posterior Before and After ICM Update")
 
+	print(f"Means for beta = {beta} : {means}")
+
+	log_posterior_before_list_beta0 = list()
+	log_posterior_after_list_beta0 = list()
 	beta_new = 0
 	for iteration in range(max_iter):
 		print(f"Iteration {iteration + 1}")
 		log_posterior_before = compute_log_posterior(Y, X_map, means, std_devs)
 		print(f"  Log Posterior Before ICM: {log_posterior_before:.4f}")
+		log_posterior_before_list_beta0.append(log_posterior_before)
 
 		X_map = updateMapEstimate(Y, X_map, beta=0)
 
 		log_posterior_after = compute_log_posterior(Y, X_map, means, std_devs)
 		print(f"  Log Posterior After ICM: {log_posterior_after:.4f}")
+		log_posterior_after_list_beta0.append(log_posterior_after)
 
 		membership = updateMemberships(membership, X_map, Y, means, std_devs, beta=0)
 		means, std_devs = updateMeansAndVariances(Y, membership)
@@ -236,6 +281,7 @@ if __name__ == "__main__":
 	save_image(X_map*mask, results_folder, "optimal_label_estimate_beta0", "Optimal Label Image Estimate beta=0")
 	save_image(membership, results_folder, "optimal_membership_beta0", "Optimal Class Membership Estimate beta=0")
 	plotMemberships(membership, "optimal_membership_beta0", "Optimal Class Membership Estimate beta=0")
+	plot_before_after_icm_update(log_posterior_before_list_beta0, log_posterior_after_list_beta0, results_folder, "before_after_icm_update_beta0", "Log Posterior Before and After ICM Update beta=0")
 
 
 
