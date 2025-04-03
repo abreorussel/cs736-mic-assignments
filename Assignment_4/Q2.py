@@ -98,12 +98,47 @@ def plot_aligned_shapes(mean_shape, aligned_shapes, directory, filename):
 	plt.figure(figsize=(8, 8))
 	
 	# Plot each aligned shape in light gray.
+	# for m in range(M):
+	# 	shape = aligned_shapes[:, :, m]
+	# 	plt.plot(shape[0, :], shape[1, :], 'o-', color='lightgray', alpha=0.7)
+
 	for m in range(M):
 		shape = aligned_shapes[:, :, m]
-		plt.plot(shape[0, :], shape[1, :], 'o-', color='lightgray', alpha=0.7)
+		half = shape.shape[1] // 2  # Get the halfway index
+
+		# Close the loop by adding the first point at the end
+		inner_x = np.append(shape[0, :half], shape[0, 0])
+		inner_y = np.append(shape[1, :half], shape[1, 0])
+
+		outer_x = np.append(shape[0, half:], shape[0, half])
+		outer_y = np.append(shape[1, half:], shape[1, half])
+
+		# Plot inner boundary (loop closed)
+		plt.plot(inner_x, inner_y, 'o-', color='blue', alpha=0.7, label="Inner" if m == 0 else None)
+
+		# Plot outer boundary (loop closed)
+		plt.plot(outer_x, outer_y, 'o-', color='red', alpha=0.7, label="Outer" if m == 0 else None)
+
 	
 	# Overlay the mean shape in red with thicker line and markers.
-	plt.plot(mean_shape[0, :], mean_shape[1, :], 'ro-', linewidth=2, markersize=8, label="Mean Shape")
+	# plt.plot(mean_shape[0, :], mean_shape[1, :], 'ro-', linewidth=2, markersize=8, label="Mean Shape")
+	# Get halfway index
+	half = mean_shape.shape[1] // 2  
+
+	# Close the loop for inner part
+	mean_inner_x = np.append(mean_shape[0, :half], mean_shape[0, 0])
+	mean_inner_y = np.append(mean_shape[1, :half], mean_shape[1, 0])
+
+	# Close the loop for outer part
+	mean_outer_x = np.append(mean_shape[0, half:], mean_shape[0, half])
+	mean_outer_y = np.append(mean_shape[1, half:], mean_shape[1, half])
+
+	# Plot inner part (using green instead of red/blue)
+	plt.plot(mean_inner_x, mean_inner_y, 'go-', linewidth=2, markersize=8, label="Mean Inner Shape")
+
+	# Plot outer part (using orange instead of red/blue)
+	plt.plot(mean_outer_x, mean_outer_y, 'mo-', linewidth=2, markersize=8, label="Mean Outer Shape")
+
 	
 	plt.title("Aligned Shapes and Computed Mean Shape")
 	plt.xlabel("X")
@@ -174,7 +209,25 @@ def plot_shape_variation(mean_shape, eigenvectors, eigenvalues, directory, filen
 	for factor in [-k, 0, k]:
 		plt.figure(figsize=(6, 6))
 		variation = mean_shape + factor * np.sqrt(eigenvalues[mode]) * eigenvectors[:, mode].reshape(2, -1)
-		plt.plot(variation[0, :], variation[1, :], label=f'b{mode}={factor}\sqrt{{\lambda_{mode}}}')
+		# plt.plot(variation[0, :], variation[1, :], label=f'b{mode}={factor}\sqrt{{\lambda_{mode}}}')
+
+		# Get halfway index
+		half = variation.shape[1] // 2  
+
+		# Close the loop for the first half
+		var_inner_x = np.append(variation[0, :half], variation[0, 0])
+		var_inner_y = np.append(variation[1, :half], variation[1, 0])
+
+		# Close the loop for the second half
+		var_outer_x = np.append(variation[0, half:], variation[0, half])
+		var_outer_y = np.append(variation[1, half:], variation[1, half])
+
+		# Plot first half (use cyan for distinction)
+		plt.plot(var_inner_x, var_inner_y, 'co-', label=f'Inner b{mode}={factor}\sqrt{{\lambda_{mode}}}')
+
+		# Plot second half (use purple for distinction)
+		plt.plot(var_outer_x, var_outer_y, 'yo-', label=f'Outer b{mode}={factor}\sqrt{{\lambda_{mode}}}')
+
 		plt.legend()
 		plt.xlabel("X-axis")
 		plt.ylabel("Y-axis")
@@ -328,7 +381,7 @@ if __name__ == "__main__":
 	mean_shape, aligned_shapes = CootesCalculateMean(shapes)
 	plot_aligned_shapes(mean_shape, aligned_shapes, results_folder, "aligned_pointsets_cootes")
 
-	algo = "kabsch"
+	algo = "cootes"
 	eigenvalues, eigenvectors, mean_shape, _ = compute_pca(shapes, algo=algo)
 	for mode in range(3):
 		plot_shape_variation(mean_shape, eigenvectors, eigenvalues, results_folder, f"mode_{mode}_{algo}" ,mode=mode)
